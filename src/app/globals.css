@@ -1,26 +1,291 @@
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200");
+@layer theme, base, clerk, components, utilities;
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@plugin "daisyui" {
+  themes: lagreen --default, dagreen --prefersdark;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@custom-variant dark (&:where([data-theme=dagreen], [data-theme=dagreen] *));
+
+@plugin "daisyui/theme" {
+  name: "dagreen";
+  default: false;
+  prefersdark: true;
+  color-scheme: "light";
+  --color-base-100: oklch(25.33% 0.016 252.42);
+  --color-base-200: oklch(23.26% 0.014 253.1);
+  --color-base-300: oklch(21.15% 0.012 254.09);
+  --color-base-content: oklch(97.807% 0.029 256.847);
+  --color-primary: oklch(69% 0.17 162.48);
+  --color-primary-content: oklch(98% 0.003 247.858);
+  --color-secondary: oklch(20% 0.042 265.755);
+  --color-secondary-content: oklch(98% 0 0);
+  --color-accent: oklch(77% 0.152 181.912);
+  --color-accent-content: oklch(98% 0.003 247.858);
+  --color-neutral: oklch(44% 0.043 257.281);
+  --color-neutral-content: oklch(98% 0 0);
+  --color-info: oklch(74% 0.16 232.661);
+  --color-info-content: oklch(98% 0.003 247.858);
+  --color-success: oklch(76% 0.177 163.223);
+  --color-success-content: oklch(98% 0.003 247.858);
+  --color-warning: oklch(82% 0.189 84.429);
+  --color-warning-content: oklch(98% 0.003 247.858);
+  --color-error: oklch(71% 0.194 13.428);
+  --color-error-content: oklch(98% 0.003 247.858);
+  --radius-selector: 0.25rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@plugin "daisyui/theme" {
+  name: "lagreen";
+  default: true;
+  prefersdark: false;
+  color-scheme: "light";
+  --color-base-100: oklch(96% 0.003 264.542);
+  --color-base-200: oklch(96% 0.001 286.375);
+  --color-base-300: oklch(97% 0 0);
+  --color-base-content: oklch(21% 0.034 264.665);
+  --color-primary: oklch(69% 0.17 162.48);
+  --color-primary-content: oklch(98% 0.003 247.858);
+  --color-secondary: oklch(98% 0.003 247.858);
+  --color-secondary-content: oklch(21% 0.034 264.665);
+  --color-accent: oklch(77% 0.152 181.912);
+  --color-accent-content: oklch(98% 0.003 247.858);
+  --color-neutral: oklch(92% 0.013 255.508);
+  --color-neutral-content: oklch(44% 0.03 256.802);
+  --color-info: oklch(74% 0.16 232.661);
+  --color-info-content: oklch(98% 0.003 247.858);
+  --color-success: oklch(76% 0.177 163.223);
+  --color-success-content: oklch(98% 0.003 247.858);
+  --color-warning: oklch(82% 0.189 84.429);
+  --color-warning-content: oklch(98% 0.003 247.858);
+  --color-error: oklch(71% 0.194 13.428);
+  --color-error-content: oklch(98% 0.003 247.858);
+  --radius-selector: 0.25rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  display: none;
+}
+
+@utility text-dynamic-xs-* {
+  --m: --value(--text- *);
+  --max: var(--m, var(--text-9xl));
+  font-size: min(var(--text-xs), var(--max));
+  @variant sm {
+    font-size: min(var(--text-sm), var(--max));
+  }
+  @variant md {
+    font-size: min(var(--text-base), var(--max));
+  }
+  @variant lg {
+    font-size: min(var(--text-lg), var(--max));
+  }
+  @variant xl {
+    font-size: min(var(--text-xl), var(--max));
+  }
+}
+@utility text-dynamic-sm-* {
+  --m: --value(--text- *);
+  --max: var(--m, var(--text-9xl));
+  font-size: min(var(--text-sm), var(--max));
+  @variant sm {
+    font-size: min(var(--text-base), var(--max));
+  }
+  @variant md {
+    font-size: min(var(--text-lg), var(--max));
+  }
+  @variant lg {
+    font-size: min(var(--text-xl), var(--max));
+  }
+  @variant xl {
+    font-size: min(var(--text-2xl), var(--max));
+  }
+}
+@utility text-dynamic-base-* {
+  --m: --value(--text- *);
+  --max: var(--m, var(--text-9xl));
+  font-size: min(var(--text-base), var(--max));
+  @variant sm {
+    font-size: min(var(--text-lg), var(--max));
+  }
+  @variant md {
+    font-size: min(var(--text-xl), var(--max));
+  }
+  @variant lg {
+    font-size: min(var(--text-2xl), var(--max));
+  }
+  @variant xl {
+    font-size: min(var(--text-3xl), var(--max));
+  }
+}
+@utility text-dynamic-lg-* {
+  --m: --value(--text- *);
+  --max: var(--m, var(--text-9xl));
+  font-size: min(var(--text-lg), var(--max));
+  @variant sm {
+    font-size: min(var(--text-xl), var(--max));
+  }
+  @variant md {
+    font-size: min(var(--text-2xl), var(--max));
+  }
+  @variant lg {
+    font-size: min(var(--text-3xl), var(--max));
+  }
+  @variant xl {
+    font-size: min(var(--text-4xl), var(--max));
+  }
+}
+@utility text-dynamic-xl-* {
+  --m: --value(--text- *);
+  --max: var(--m, var(--text-9xl));
+  font-size: min(var(--text-xl), var(--max));
+  @variant sm {
+    font-size: min(var(--text-2xl), var(--max));
+  }
+  @variant md {
+    font-size: min(var(--text-3xl), var(--max));
+  }
+  @variant lg {
+    font-size: min(var(--text-4xl), var(--max));
+  }
+  @variant xl {
+    font-size: min(var(--text-5xl), var(--max));
+  }
+}
+@utility text-dynamic-2xl-* {
+  --m: --value(--text- *);
+  --max: var(--m, var(--text-9xl));
+  font-size: min(var(--text-2xl), var(--max));
+  @variant sm {
+    font-size: min(var(--text-3xl), var(--max));
+  }
+  @variant md {
+    font-size: min(var(--text-4xl), var(--max));
+  }
+  @variant lg {
+    font-size: min(var(--text-5xl), var(--max));
+  }
+  @variant xl {
+    font-size: min(var(--text-6xl), var(--max));
+  }
+}
+
+@utility text-dynamic-3xl-* {
+  --m: --value(--text- *);
+  --max: var(--m, var(--text-9xl));
+  font-size: min(var(--text-3xl), var(--max));
+  @variant sm {
+    font-size: min(var(--text-4xl), var(--max));
+  }
+  @variant md {
+    font-size: min(var(--text-5xl), var(--max));
+  }
+  @variant lg {
+    font-size: min(var(--text-6xl), var(--max));
+  }
+  @variant xl {
+    font-size: min(var(--text-7xl), var(--max));
+  }
+}
+@utility text-dynamic-4xl-* {
+  --m: --value(--text- *);
+  --max: var(--m, var(--text-9xl));
+  font-size: min(var(--text-4xl), var(--max));
+  @variant sm {
+    font-size: min(var(--text-5xl), var(--max));
+  }
+  @variant md {
+    font-size: min(var(--text-6xl), var(--max));
+  }
+  @variant lg {
+    font-size: min(var(--text-7xl), var(--max));
+  }
+  @variant xl {
+    font-size: min(var(--text-8xl), var(--max));
+  }
+}
+@utility text-dynamic-5xl-* {
+  --m: --value(--text- *);
+  --max: var(--m, var(--text-9xl));
+  font-size: min(var(--text-5xl), var(--max));
+  @variant sm {
+    font-size: min(var(--text-6xl), var(--max));
+  }
+  @variant md {
+    font-size: min(var(--text-7xl), var(--max));
+  }
+  @variant lg {
+    font-size: min(var(--text-8xl), var(--max));
+  }
+  @variant xl {
+    font-size: min(var(--text-9xl), var(--max));
+  }
+}
+
+@utility container-x {
+  @apply w-full max-w-[1440px] mx-auto px-6 sm:px-12 lg:px-16 xl:px-20;
+}
+
+@utility gradient-* {
+  --n: --value(--color- *);
+  --op: calc(--modifier(integer) * 1%);
+
+  --to: color-mix(in oklch, var(--n), var(--color-neutral) 20%);
+  --from-a: --alpha(var(--n) / var(--op, 100%));
+  --to-a: --alpha(var(--to) / var(--op, 100%));
+
+  background-image: linear-gradient(
+    to bottom right,
+    var(--from-a),
+    var(--to-a),
+    var(--from-a)
+  );
+}
+
+@utility gradient-text-* {
+  --n: --value(--color- *);
+  --op: calc(--modifier(integer) * 1%);
+
+  --to: color-mix(in oklch, var(--n), var(--color-neutral) 50%);
+  --from-a: --alpha(var(--n) / var(--op, 100%));
+  --to-a: --alpha(var(--to) / var(--op, 100%));
+  background-image: linear-gradient(
+    to bottom right,
+    var(--from-a),
+    var(--to-a),
+    var(--from-a)
+  );
+  @apply bg-clip-text text-transparent;
+}
+
+@utility gradient-text {
+  @apply gradient-primary/100 bg-clip-text text-transparent;
+}
+
+@utility hover-lift {
+  @apply transform transition duration-200 hover:-translate-y-1 hover:shadow-2xl;
+}
+
+.material-symbols-outlined {
+  font-family: "Material Symbols Outlined", Arial, Helvetica, sans-serif;
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
 }
