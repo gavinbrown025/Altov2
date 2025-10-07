@@ -1,7 +1,5 @@
 import { getCurrentUserProfile, getCurrentUserPlaylists, getCurrentUserTopTracks } from "@/lib/spotify";
 
-import SpotifySearch from "@/components/SpotifySearch";
-
 interface DashboardContentProps {}
 
 
@@ -15,7 +13,6 @@ export default async function DashboardContent() {
 
     return (
       <div className="space-y-8">
-        {/* User Profile Section */}
         <section className="bg-gradient-to-r from-green-400 to-blue-500 rounded-lg p-6 text-white">
           <div className="flex items-center space-x-4">
             {profile.images && profile.images[0] && (
@@ -88,11 +85,6 @@ export default async function DashboardContent() {
             </div>
           </section>
         </div>
-
-        {/* Search Section */}
-        <section className="mt-8">
-          <SpotifySearch />
-        </section>
       </div>
     );
   } catch (error) {

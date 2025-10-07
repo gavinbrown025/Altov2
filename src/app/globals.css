@@ -1,12 +1,7 @@
-@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200");
-@layer theme, base, clerk, components, utilities;
 @import "tailwindcss";
-
 @plugin "daisyui" {
   themes: lagreen --default, dagreen --prefersdark;
 }
-
-@custom-variant dark (&:where([data-theme=dagreen], [data-theme=dagreen] *));
 
 @plugin "daisyui/theme" {
   name: "dagreen";
@@ -34,7 +29,7 @@
   --color-error: oklch(71% 0.194 13.428);
   --color-error-content: oklch(98% 0.003 247.858);
   --radius-selector: 0.25rem;
-  --radius-field: 0.25rem;
+  --radius-field: 0.5rem;
   --radius-box: 0.5rem;
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
@@ -78,167 +73,11 @@
   --noise: 0;
 }
 
+@layer theme, base, clerk, components, utilities;
+@custom-variant dark (&:where([data-theme=dagreen], [data-theme=dagreen] *));
+
 body {
   font-family: Arial, Helvetica, sans-serif;
-}
-
-input[type="date"]::-webkit-calendar-picker-indicator {
-  display: none;
-}
-
-@utility text-dynamic-xs-* {
-  --m: --value(--text- *);
-  --max: var(--m, var(--text-9xl));
-  font-size: min(var(--text-xs), var(--max));
-  @variant sm {
-    font-size: min(var(--text-sm), var(--max));
-  }
-  @variant md {
-    font-size: min(var(--text-base), var(--max));
-  }
-  @variant lg {
-    font-size: min(var(--text-lg), var(--max));
-  }
-  @variant xl {
-    font-size: min(var(--text-xl), var(--max));
-  }
-}
-@utility text-dynamic-sm-* {
-  --m: --value(--text- *);
-  --max: var(--m, var(--text-9xl));
-  font-size: min(var(--text-sm), var(--max));
-  @variant sm {
-    font-size: min(var(--text-base), var(--max));
-  }
-  @variant md {
-    font-size: min(var(--text-lg), var(--max));
-  }
-  @variant lg {
-    font-size: min(var(--text-xl), var(--max));
-  }
-  @variant xl {
-    font-size: min(var(--text-2xl), var(--max));
-  }
-}
-@utility text-dynamic-base-* {
-  --m: --value(--text- *);
-  --max: var(--m, var(--text-9xl));
-  font-size: min(var(--text-base), var(--max));
-  @variant sm {
-    font-size: min(var(--text-lg), var(--max));
-  }
-  @variant md {
-    font-size: min(var(--text-xl), var(--max));
-  }
-  @variant lg {
-    font-size: min(var(--text-2xl), var(--max));
-  }
-  @variant xl {
-    font-size: min(var(--text-3xl), var(--max));
-  }
-}
-@utility text-dynamic-lg-* {
-  --m: --value(--text- *);
-  --max: var(--m, var(--text-9xl));
-  font-size: min(var(--text-lg), var(--max));
-  @variant sm {
-    font-size: min(var(--text-xl), var(--max));
-  }
-  @variant md {
-    font-size: min(var(--text-2xl), var(--max));
-  }
-  @variant lg {
-    font-size: min(var(--text-3xl), var(--max));
-  }
-  @variant xl {
-    font-size: min(var(--text-4xl), var(--max));
-  }
-}
-@utility text-dynamic-xl-* {
-  --m: --value(--text- *);
-  --max: var(--m, var(--text-9xl));
-  font-size: min(var(--text-xl), var(--max));
-  @variant sm {
-    font-size: min(var(--text-2xl), var(--max));
-  }
-  @variant md {
-    font-size: min(var(--text-3xl), var(--max));
-  }
-  @variant lg {
-    font-size: min(var(--text-4xl), var(--max));
-  }
-  @variant xl {
-    font-size: min(var(--text-5xl), var(--max));
-  }
-}
-@utility text-dynamic-2xl-* {
-  --m: --value(--text- *);
-  --max: var(--m, var(--text-9xl));
-  font-size: min(var(--text-2xl), var(--max));
-  @variant sm {
-    font-size: min(var(--text-3xl), var(--max));
-  }
-  @variant md {
-    font-size: min(var(--text-4xl), var(--max));
-  }
-  @variant lg {
-    font-size: min(var(--text-5xl), var(--max));
-  }
-  @variant xl {
-    font-size: min(var(--text-6xl), var(--max));
-  }
-}
-
-@utility text-dynamic-3xl-* {
-  --m: --value(--text- *);
-  --max: var(--m, var(--text-9xl));
-  font-size: min(var(--text-3xl), var(--max));
-  @variant sm {
-    font-size: min(var(--text-4xl), var(--max));
-  }
-  @variant md {
-    font-size: min(var(--text-5xl), var(--max));
-  }
-  @variant lg {
-    font-size: min(var(--text-6xl), var(--max));
-  }
-  @variant xl {
-    font-size: min(var(--text-7xl), var(--max));
-  }
-}
-@utility text-dynamic-4xl-* {
-  --m: --value(--text- *);
-  --max: var(--m, var(--text-9xl));
-  font-size: min(var(--text-4xl), var(--max));
-  @variant sm {
-    font-size: min(var(--text-5xl), var(--max));
-  }
-  @variant md {
-    font-size: min(var(--text-6xl), var(--max));
-  }
-  @variant lg {
-    font-size: min(var(--text-7xl), var(--max));
-  }
-  @variant xl {
-    font-size: min(var(--text-8xl), var(--max));
-  }
-}
-@utility text-dynamic-5xl-* {
-  --m: --value(--text- *);
-  --max: var(--m, var(--text-9xl));
-  font-size: min(var(--text-5xl), var(--max));
-  @variant sm {
-    font-size: min(var(--text-6xl), var(--max));
-  }
-  @variant md {
-    font-size: min(var(--text-7xl), var(--max));
-  }
-  @variant lg {
-    font-size: min(var(--text-8xl), var(--max));
-  }
-  @variant xl {
-    font-size: min(var(--text-9xl), var(--max));
-  }
 }
 
 @utility container-x {
@@ -283,9 +122,4 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 @utility hover-lift {
   @apply transform transition duration-200 hover:-translate-y-1 hover:shadow-2xl;
-}
-
-.material-symbols-outlined {
-  font-family: "Material Symbols Outlined", Arial, Helvetica, sans-serif;
-  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
 }

@@ -6,24 +6,29 @@ import {
   UserButton,
 } from "@clerk/nextjs";
 
-export default function Nav() {
+import SpotifySearch from "@/components/SpotifySearch";
+
+export default function Nav({ className }: { className?: string }) {
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className={`bg-base-200 px-4 sm:px-6 lg:px-8 ${className}`}>
       <nav className="flex items-center justify-between gap-4 py-4">
         <div className="logo">ALTO</div>
-        <div className="shrink flex gap-4">
-          <SignedOut>
-            <SignInButton />
-            <SignUpButton>
-              <button className="bg-accent text-white rounded-full font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer">
-                Sign Up
-              </button>
-            </SignUpButton>
-          </SignedOut>
-          <SignedIn>
+
+        <SignedOut>
+          <SignInButton />
+          <SignUpButton>
+            <button className="bg-accent text-white rounded-full font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer">
+              Sign Up
+            </button>
+          </SignUpButton>
+        </SignedOut>
+
+        <SignedIn>
+          <SpotifySearch />
+          <div className="flex justify-end">
             <UserButton />
-          </SignedIn>
-        </div>
+          </div>
+        </SignedIn>
       </nav>
     </div>
   );
