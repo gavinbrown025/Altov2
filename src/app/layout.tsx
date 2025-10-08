@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { DashboardProvider } from "@/contexts/DashboardContext";
-// import { Geist, Geist_Mono } from "next/font/google";
 
 import "./globals.css";
 

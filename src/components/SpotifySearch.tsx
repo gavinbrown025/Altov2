@@ -2,6 +2,7 @@
 
 import UIIcon from "@/components/UIIcon";
 import { useSearch } from "@/contexts/SearchContext";
+import { useRouter } from "next/navigation";
 
 export default function SpotifySearch() {
   const {
@@ -12,12 +13,19 @@ export default function SpotifySearch() {
     searchType,
     setSearchType,
     handleSearch,
+    results,
   } = useSearch();
+  const router = useRouter();
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!query.trim()) return;
     await handleSearch();
+    router.push("/search");
+  };
+
+  const handleSearchFocus = () => {
+    if (results.length > 0) router.push("/search");
   };
 
   return (
@@ -29,6 +37,7 @@ export default function SpotifySearch() {
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              onFocus={handleSearchFocus}
               placeholder="Search"
             />
           </label>
@@ -61,7 +70,7 @@ export default function SpotifySearch() {
       </form>
 
       {error && (
-        <div className="bg-red-100 dark:bg-red-900 border border-red-400 text-red-700 dark:text-red-300 px-4 py-3 rounded">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
           <p className="font-semibold">Error:</p>
           <p>{error.message}</p>
         </div>
