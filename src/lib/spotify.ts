@@ -1,4 +1,3 @@
-import { auth, clerkClient } from "@clerk/nextjs/server";
 import type {
   SpotifyUser,
   SpotifyPaginatedResponse,
@@ -10,6 +9,7 @@ import type {
   SpotifyRecentlyPlayedTrack,
   SpotifyCurrentPlayback,
 } from "@/types/spotify";
+import { getSpotifyToken } from "./getToken";
 
 const SPOTIFY_API_BASE_URL = "https://api.spotify.com/v1";
 
@@ -17,17 +17,7 @@ const SPOTIFY_API_BASE_URL = "https://api.spotify.com/v1";
  * Simple helper to make Spotify API requests - gets token on demand
  */
 async function spotifyFetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const { userId } = await auth();
-  if (!userId) throw new Error("User not authenticated");
-
-  const client = await clerkClient();
-  const tokenResponse = await client.users.getUserOauthAccessToken(userId, "spotify");
-
-  if (tokenResponse.data.length === 0) {
-    throw new Error("No Spotify connection found. Please sign in with Spotify.");
-  }
-
-  const token = tokenResponse.data[0].token;
+  const token = await getSpotifyToken();
   const url = `${SPOTIFY_API_BASE_URL}${endpoint}`;
 
   const response = await fetch(url, {

@@ -8,6 +8,7 @@ import Nav from "@/components/Nav";
 import Sidebar from "@/components/Sidebar";
 import Player from "@/components/Player";
 import { SearchProvider } from "@/contexts/SearchContext";
+import { QueueProvider } from "@/contexts/QueueContext";
 
 export const metadata: Metadata = {
   title: "Alto on Spotify",
@@ -50,12 +51,14 @@ export default function RootLayout({
         <body className="min-h-screen antialiased">
           <DashboardProvider>
             <SearchProvider>
-              <div className="grid grid-rows-[auto_1fr_auto] grid-cols-[auto_1fr] h-screen">
-                <Nav className="col-span-full" />
-                <Sidebar />
-                <main className=" overflow-y-auto p-6">{children}</main>
-                <Player className="col-span-full" />
-              </div>
+              <QueueProvider>
+                <div className="grid grid-rows-[auto_1fr_auto] grid-cols-[auto_1fr] h-screen">
+                  <Nav className="col-span-full" />
+                  <Sidebar />
+                  <main className=" overflow-y-auto p-6">{children}</main>
+                  <Player className="col-span-full" />
+                </div>
+              </QueueProvider>
             </SearchProvider>
           </DashboardProvider>
         </body>

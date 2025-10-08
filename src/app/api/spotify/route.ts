@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth, clerkClient } from "@clerk/nextjs/server";
+import { getSpotifyToken } from "@/lib/getToken";
 
 // Simple API route that proxies Spotify requests with automatic token handling
 export async function GET(request: NextRequest) {
@@ -11,19 +11,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const client = await clerkClient();
-    const tokenResponse = await client.users.getUserOauthAccessToken(userId, "spotify");
-
-    if (tokenResponse.data.length === 0) {
-      return NextResponse.json({ error: "No Spotify connection found" }, { status: 404 });
-    }
-
-    const token = tokenResponse.data[0].token;
+    const token = await getSpotifyToken();
     const spotifyResponse = await fetch(`https://api.spotify.com/v1${endpoint}`, {
       headers: {
         Authorization: `Bearer ${token}`,
