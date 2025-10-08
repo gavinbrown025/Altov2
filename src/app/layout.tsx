@@ -54,9 +54,9 @@ export default function RootLayout({
               <QueueProvider>
                 <div className="grid grid-rows-[auto_1fr_auto] grid-cols-[auto_1fr] h-screen">
                   <Nav className="col-span-full" />
-                  <Sidebar />
+                  <Sidebar className="row-span-2"/>
                   <main className=" overflow-y-auto p-6">{children}</main>
-                  <Player className="col-span-full" />
+                  <Player className="col-start-1 sm:col-start-2" />
                 </div>
               </QueueProvider>
             </SearchProvider>

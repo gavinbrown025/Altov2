@@ -8,6 +8,7 @@ import type {
   SpotifyTrack,
   SpotifyArtist,
   SpotifySearchResponse,
+  SpotifyQueue,
 } from "@/types/spotify";
 
 interface SpotifyError {
@@ -76,6 +77,11 @@ export function useSpotifyApi() {
     [spotifyRequest]
   );
 
+  const getCurrentQueue = useCallback(
+    () => spotifyRequest<SpotifyQueue>("/me/player/queue"),
+    [spotifyRequest]
+  );
+
   return {
     loading,
     error,
@@ -85,6 +91,7 @@ export function useSpotifyApi() {
     getTopArtists,
     search,
     getRecentlyPlayed,
+    getCurrentQueue,
     spotifyRequest,
   };
 }

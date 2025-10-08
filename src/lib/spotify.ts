@@ -8,6 +8,7 @@ import type {
   SpotifySearchResponse,
   SpotifyRecentlyPlayedTrack,
   SpotifyCurrentPlayback,
+  SpotifyQueue,
 } from "@/types/spotify";
 import { getSpotifyToken } from "./getToken";
 
@@ -86,6 +87,18 @@ export async function getCurrentPlaybackState(): Promise<SpotifyCurrentPlayback 
     return await spotifyFetch<SpotifyCurrentPlayback>("/me/player");
   } catch (error) {
     // Spotify returns 204 No Content when no device is active
+    if (error instanceof Error && error.message.includes("204")) {
+      return null;
+    }
+    throw error;
+  }
+}
+
+export async function getCurrentQueue(): Promise<SpotifyQueue | null> {
+  try {
+    return await spotifyFetch<SpotifyQueue>("/me/player/queue");
+  } catch (error) {
+    // Spotify returns 204 No Content when no device is active or no queue
     if (error instanceof Error && error.message.includes("204")) {
       return null;
     }

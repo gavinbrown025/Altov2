@@ -1,22 +1,32 @@
 import { SpotifyTrack } from "@/types/spotify";
 import { formatDuration } from "@/lib/utils";
+import { useQueue } from "@/contexts/QueueContext";
 
 import UIIcon from "@/components/UIIcon";
 
 export default function TrackListItem({
   track,
   index,
+  isCurrentTrack,
 }: {
   track: SpotifyTrack;
   index?: number;
+  isCurrentTrack?: boolean;
 }) {
+  const { currentTrack } = useQueue();
+
+  // If isCurrentTrack is explicitly provided, use that
+  // Otherwise, default to checking if this track matches the currently playing track
+  const isCurrent = isCurrentTrack !== undefined ? isCurrentTrack : currentTrack?.id === track.id;
   return (
     <div
       key={track.id}
-      className="flex items-center space-x-3 p-3 rounded-lg hover:bg-base-300 transition-colors"
+      className={`flex items-center space-x-3 p-3 rounded-lg hover:bg-base-300 transition-colors ${
+        isCurrent ? "bg-base-300" : ""
+      }`}
     >
       {index !== null && index !== undefined && (
-        <div className="w-8 text-center text-lg font-bold text-neutral">
+        <div className={`w-8 text-center text-lg font-bold text-neutral `}>
           {index + 1}
         </div>
       )}
@@ -33,7 +43,7 @@ export default function TrackListItem({
       )}
 
       <div className="flex-1 min-w-0">
-        <h4 className="font-medium truncate">{track.name}</h4>
+        <h4 className={`font-medium truncate ${isCurrent ? "text-primary" : ""}`}>{track.name}</h4>
         <p className="text-sm text-neutral truncate">
           {track.artists.map((artist) => artist.name).join(", ")} •{" "}
           {track.album.name}

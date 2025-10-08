@@ -135,3 +135,8 @@ export interface SpotifyCurrentPlayback {
   currently_playing_type: "track" | "episode" | "ad" | "unknown";
   is_playing: boolean;
 }
+
+export interface SpotifyQueue {
+  currently_playing: SpotifyTrack | null;
+  queue: SpotifyTrack[];
+}
