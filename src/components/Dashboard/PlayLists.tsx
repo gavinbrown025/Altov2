@@ -10,7 +10,7 @@ export default function PlayLists() {
         {playlists.map((playlist) => (
           <div
             key={playlist.id}
-            className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-100 transition-colors"
+            className="flex items-center space-x-3 p-3 rounded-lg hover:bg-base-300 transition-colors"
           >
             {playlist.images && playlist.images[0] && (
               <img
