@@ -25,11 +25,7 @@ export default function Queue() {
       {currentTrack && (
         <div>
           <h3 className="text-lg font-semibold mb-4">Now Playing</h3>
-          {loading ? (
-            <TrackLoading />
-          ) : (
-            <TrackListItem track={currentTrack} isCurrentTrack={true} />
-          )}
+          {loading ? <TrackLoading /> : <TrackListItem track={currentTrack} />}
         </div>
       )}
 
@@ -37,13 +33,17 @@ export default function Queue() {
       <div>
         <h3 className="text-lg font-semibold mb-2">Up Next</h3>
         <div className="space-y-3">
-          {queue.map((track, index) => (
-            <TrackListItem
-              key={`queue-${index}`}
-              track={track}
-              isCurrentTrack={false}
-            />
-          ))}
+          {queue.map((track, index) =>
+            loading ? (
+              <TrackLoading key={`queue-${index}`} />
+            ) : (
+              <TrackListItem
+                key={`queue-${index}`}
+                track={track}
+                isCurrentTrack={false}
+              />
+            )
+          )}
         </div>
       </div>
     </section>

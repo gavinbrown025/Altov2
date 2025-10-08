@@ -1,17 +1,31 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import { useSpotifyApi } from "@/hooks/useSpotifyApi";
 import type { SpotifyTrack } from "@/types/spotify";
 
+interface PlaybackState {
+  isPlaying: boolean;
+  paused: boolean;
+  position: number; // Current position in ms
+  duration: number; // Track duration in ms
+  shuffle: boolean;
+  repeat_mode: 0 | 1 | 2;
+}
+
 interface QueueContextType {
+  // Queue state
   currentTrack: SpotifyTrack | null;
   queue: SpotifyTrack[];
   loading: boolean;
   error: string | null;
 
+  // Playback state (from Web Playback SDK)
+  playbackState: PlaybackState | null;
+
   // Actions
   refreshQueue: () => Promise<void>;
+  updatePlaybackState: (state: PlaybackState) => void;
 }
 
 const QueueContext = createContext<QueueContextType | undefined>(undefined);
@@ -21,12 +35,20 @@ interface QueueProviderProps {
 }
 
 export function QueueProvider({ children }: QueueProviderProps) {
+  // Queue state
   const [currentTrack, setCurrentTrack] = useState<SpotifyTrack | null>(null);
   const [queue, setQueue] = useState<SpotifyTrack[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Playback state (updated from Player component)
+  const [playbackState, setPlaybackState] = useState<PlaybackState | null>(null);
+
   const { getCurrentQueue } = useSpotifyApi();
+
+  const updatePlaybackState = useCallback((state: PlaybackState) => {
+    setPlaybackState(state);
+  }, []);
 
   const refreshQueue = async () => {
     setLoading(true);
@@ -62,7 +84,9 @@ export function QueueProvider({ children }: QueueProviderProps) {
     queue,
     loading,
     error,
+    playbackState,
     refreshQueue,
+    updatePlaybackState,
   };
 
   return (

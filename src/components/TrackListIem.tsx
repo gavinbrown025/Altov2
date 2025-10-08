@@ -13,11 +13,14 @@ export default function TrackListItem({
   index?: number;
   isCurrentTrack?: boolean;
 }) {
-  const { currentTrack } = useQueue();
+  const { currentTrack, playbackState } = useQueue();
 
   // If isCurrentTrack is explicitly provided, use that
   // Otherwise, default to checking if this track matches the currently playing track
-  const isCurrent = isCurrentTrack !== undefined ? isCurrentTrack : currentTrack?.id === track.id;
+  const isCurrent =
+    isCurrentTrack !== undefined
+      ? isCurrentTrack
+      : currentTrack?.id === track.id;
   return (
     <div
       key={track.id}
@@ -30,20 +33,33 @@ export default function TrackListItem({
           {index + 1}
         </div>
       )}
-      {track.album.images && track.album.images[0] ? (
-        <img
-          src={track.album.images[0].url}
-          alt={track.album.name}
-          className="size-12 rounded"
-        />
-      ) : (
-        <div className="size-12 rounded bg-neutral grid place-items-center">
+      <div className="group relative size-12 rounded bg-neutral grid place-items-center">
+        {isCurrent && (
+          <div className="cursor-pointer z-10 hidden absolute size-full bg-base-300/40 inset-0 group-hover:grid place-items-center">
+            {playbackState?.isPlaying ? (
+              <UIIcon iconName="pause" />
+            ) : (
+              <UIIcon iconName="play_arrow" />
+            )}
+          </div>
+        )}
+        {track.album.images && track.album.images[0] ? (
+          <img
+            src={track.album.images[0].url}
+            alt={track.album.name}
+            className="size-12 rounded"
+          />
+        ) : (
           <UIIcon iconName="hide_image" />
-        </div>
-      )}
+        )}
+      </div>
 
       <div className="flex-1 min-w-0">
-        <h4 className={`font-medium truncate ${isCurrent ? "text-primary" : ""}`}>{track.name}</h4>
+        <h4
+          className={`font-medium truncate ${isCurrent ? "text-primary" : ""}`}
+        >
+          {track.name}
+        </h4>
         <p className="text-sm text-neutral truncate">
           {track.artists.map((artist) => artist.name).join(", ")} •{" "}
           {track.album.name}
