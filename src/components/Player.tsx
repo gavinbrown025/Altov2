@@ -7,7 +7,7 @@ import { useSpotifyToken } from "@/hooks/useSpotifyToken";
 
 export default function Player({ className }: { className?: string }) {
   const { token, loading: tokenLoading, error: tokenError } = useSpotifyToken();
-  const { currentTrack, updatePlaybackState, refreshQueue } = useQueue();
+  const { currentTrack, updatePlaybackState, refreshQueue, setDeviceId } = useQueue();
 
   const [playerReady, setPlayerReady] = useState(false);
 
@@ -15,28 +15,25 @@ export default function Player({ className }: { className?: string }) {
   const initializePlayerDevice = useCallback(
     async (deviceId: string) => {
       if (!token || playerReady) return;
-
       try {
         await spotifyApi.setDevice(token, deviceId, false);
+        setDeviceId(deviceId);
         setPlayerReady(true);
-        setTimeout(refreshQueue, 1500);
       } catch (error) {
         console.error("Failed to initialize player device:", error);
       }
     },
-    [token, playerReady, refreshQueue]
+    [token, playerReady]
   );
 
   // Handle track changes and playback state updates
   const handlePlayerCallback = useCallback(
-    (state: any) => {
+    async (state: any) => {
       if (!state) return;
-
       // Initialize device when ready
       if (!playerReady && state.deviceId && token) {
-        initializePlayerDevice(state.deviceId);
+        await initializePlayerDevice(state.deviceId);
       }
-
       // Refresh queue on track change
       if (
         state.track?.id &&
@@ -68,14 +65,14 @@ export default function Player({ className }: { className?: string }) {
 
   // Loading state
   const TokenLoading = () => (
-    <div className={`bg-base-300 p-4 rounded-lg ${className}`}>
+    <div className={`bg-base-300 p-4 grid place-items-center ${className}`}>
       <span className="loading loading-ring loading-xl"></span>
     </div>
   );
 
   // Error state
   const TokenError = () => (
-    <div className={`bg-base-300 p-4 rounded-lg ${className}`}>
+    <div className={`bg-base-300 p-4 ${className}`}>
       <div className="text-center text-error">
         Your Account is not Authorized to use Spotify Player.
       </div>
@@ -84,7 +81,7 @@ export default function Player({ className }: { className?: string }) {
 
   return (
     <div className={`${className}`}>
-      <div className="bg-base-300 rounded-lg overflow-hidden">
+      <div className="bg-base-300 px-4 py-2">
         {tokenLoading ? (
           <TokenLoading />
         ) : tokenError ? (
@@ -92,7 +89,8 @@ export default function Player({ className }: { className?: string }) {
         ) : (
           <SpotifyPlayer
             token={token}
-            uris={[]} // Empty array - we sync with external device instead
+            uris={[]}
+            play={false}
             styles={{
               activeColor: "oklch(69% 0.17 162.48)",
               bgColor: "transparent",

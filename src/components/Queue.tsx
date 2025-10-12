@@ -16,6 +16,22 @@ const TrackLoading = () => (
 export default function Queue() {
   const { currentTrack, loading, queue, error } = useQueue();
 
+  if (loading)
+    return (
+      <div className="space-y-6">
+        <div>
+          <div className="skeleton w-32 h-6 mb-4 text-lg"></div>
+          <TrackLoading />
+        </div>
+        <div>
+          <div className="skeleton w-32 h-6 mb-4 text-lg"></div>
+          {[...Array(4)].map((_, index) => (
+            <TrackLoading key={`loading-${index}`} />
+          ))}
+        </div>
+      </div>
+    );
+
   if (error) return <p>Error: {error}</p>;
   if (queue.length === 0) return <p>No active playback.</p>;
 

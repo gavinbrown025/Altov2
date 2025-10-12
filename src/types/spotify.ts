@@ -96,7 +96,7 @@ export interface SpotifySearchResponse {
   playlists?: SpotifyPaginatedResponse<SpotifyPlaylist>;
 }
 
-export interface SpotifyRecentlyPlayedTrack {
+export interface SpotifyRecentTrack {
   track: SpotifyTrack;
   played_at: string;
   context: {

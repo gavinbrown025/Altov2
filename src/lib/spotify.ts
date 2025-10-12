@@ -6,7 +6,7 @@ import type {
   SpotifyArtist,
   SpotifyPlaylistTrack,
   SpotifySearchResponse,
-  SpotifyRecentlyPlayedTrack,
+  SpotifyRecentTrack,
   SpotifyCurrentPlayback,
   SpotifyQueue,
 } from "@/types/spotify";
@@ -78,8 +78,8 @@ export async function searchSpotify(
   return spotifyFetch<SpotifySearchResponse>(`/search?q=${encodedQuery}&type=${type}&limit=${limit}`);
 }
 
-export async function getRecentlyPlayedTracks(limit = 20): Promise<SpotifyPaginatedResponse<SpotifyRecentlyPlayedTrack>> {
-  return spotifyFetch<SpotifyPaginatedResponse<SpotifyRecentlyPlayedTrack>>(`/me/player/recently-played?limit=${limit}`);
+export async function getRecentlyPlayedTracks(limit = 20): Promise<SpotifyPaginatedResponse<SpotifyRecentTrack>> {
+  return spotifyFetch<SpotifyPaginatedResponse<SpotifyRecentTrack>>(`/me/player/recently-played?limit=${limit}`);
 }
 
 export async function getCurrentPlaybackState(): Promise<SpotifyCurrentPlayback | null> {

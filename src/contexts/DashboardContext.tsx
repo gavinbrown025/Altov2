@@ -1,14 +1,28 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+
 import { useUser } from "@clerk/nextjs";
 import { useSpotifyApi } from "@/hooks/useSpotifyApi";
-import type { SpotifyUser, SpotifyPlaylist, SpotifyTrack } from "@/types/spotify";
+import type {
+  SpotifyUser,
+  SpotifyPlaylist,
+  SpotifyTrack,
+  SpotifyRecentTrack,
+} from "@/types/spotify";
 
 interface DashboardData {
   user: SpotifyUser | null;
   playlists: SpotifyPlaylist[];
   topTracks: SpotifyTrack[];
+  recentTracks: SpotifyRecentTrack[];
+  recommendations: SpotifyTrack[];
   loading: boolean;
 }
 
@@ -19,41 +33,57 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
     user: null,
     playlists: [],
     topTracks: [],
+    recentTracks: [],
+    recommendations: [],
     loading: true,
   });
 
   const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
-  const { getCurrentUser, getUserPlaylists, getTopTracks } = useSpotifyApi();
+  const {
+    getCurrentUser,
+    getUserPlaylists,
+    getTopTracks,
+    getRecentlyPlayed,
+    getRecommendations,
+  } = useSpotifyApi();
 
   useEffect(() => {
     // Only load data if Clerk has loaded and user is authenticated
-    if (!clerkLoaded) {
-      return; // Still loading Clerk
-    }
+    if (!clerkLoaded) return;
 
     if (!clerkUser) {
       // User not authenticated, set loading to false
-      setData(prev => ({ ...prev, loading: false }));
+      setData((prev) => ({ ...prev, loading: false }));
       return;
     }
 
     const loadData = async () => {
       try {
-        const [user, playlists, topTracks] = await Promise.all([
+        const [user, playlists, topTracks, recentTracks] = await Promise.all([
           getCurrentUser(),
           getUserPlaylists(10, 0),
           getTopTracks("medium_term", 10),
+          getRecentlyPlayed(20),
         ]);
+
+        const seedTracks = recentTracks.items
+          .slice(0, 5)
+          .map(({ track }) => track as SpotifyTrack);
+        console.log(seedTracks);
+        const recommendations = await getRecommendations({ seedTracks });
+        console.log(recommendations);
 
         setData({
           user,
           playlists: playlists.items,
           topTracks: topTracks.items,
+          recentTracks: recentTracks.items,
+          recommendations: recommendations.tracks,
           loading: false,
         });
       } catch (error) {
         console.error("Failed to load dashboard data:", error);
-        setData(prev => ({ ...prev, loading: false }));
+        setData((prev) => ({ ...prev, loading: false }));
       }
     };
 

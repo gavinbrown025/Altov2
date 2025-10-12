@@ -1,3 +1,4 @@
+"use client";
 import { SpotifyTrack } from "@/types/spotify";
 import { formatDuration } from "@/lib/utils";
 import { useQueue } from "@/contexts/QueueContext";
@@ -13,7 +14,7 @@ export default function TrackListItem({
   index?: number;
   isCurrentTrack?: boolean;
 }) {
-  const { currentTrack, playbackState } = useQueue();
+  const { currentTrack, playbackState, playTrack, togglePlayPause } = useQueue();
 
   // If isCurrentTrack is explicitly provided, use that
   // Otherwise, default to checking if this track matches the currently playing track
@@ -21,6 +22,19 @@ export default function TrackListItem({
     isCurrentTrack !== undefined
       ? isCurrentTrack
       : currentTrack?.id === track.id;
+
+  const isPlaying = isCurrent && playbackState?.isPlaying;
+
+  const handleTrackClick = async () => {
+    if (isCurrent) {
+      // If this is the current track, just toggle play/pause
+      await togglePlayPause();
+    } else {
+      // If different track, play it
+      await playTrack(track);
+    }
+  };
+
   return (
     <div
       key={track.id}
@@ -34,16 +48,17 @@ export default function TrackListItem({
         </div>
       )}
       <div className="group relative size-12 rounded bg-neutral grid place-items-center">
-        {isCurrent && (
-          <div className="cursor-pointer z-10 hidden absolute size-full bg-base-300/40 inset-0 group-hover:grid place-items-center">
-            {playbackState?.isPlaying ? (
-              <UIIcon iconName="pause" />
-            ) : (
-              <UIIcon iconName="play_arrow" />
-            )}
-          </div>
-        )}
-        {track.album.images && track.album.images[0] ? (
+        <div
+          className="cursor-pointer z-10 hidden absolute size-full bg-base-300/40 inset-0 group-hover:grid place-items-center"
+          onClick={handleTrackClick}
+        >
+          {isPlaying ? (
+            <UIIcon iconName="pause" />
+          ) : (
+            <UIIcon iconName="play_arrow" />
+          )}
+        </div>
+        {track.album?.images && track.album.images[0] ? (
           <img
             src={track.album.images[0].url}
             alt={track.album.name}
@@ -61,7 +76,7 @@ export default function TrackListItem({
           {track.name}
         </h4>
         <p className="text-sm text-neutral truncate">
-          {track.artists.map((artist) => artist.name).join(", ")} •{" "}
+          {track.artists?.map((artist) => artist.name).join(", ")} •{" "}
           {track.album.name}
         </p>
       </div>

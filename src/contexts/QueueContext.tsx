@@ -1,6 +1,12 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  ReactNode,
+} from "react";
 import { useSpotifyApi } from "@/hooks/useSpotifyApi";
 import type { SpotifyTrack } from "@/types/spotify";
 
@@ -26,6 +32,12 @@ interface QueueContextType {
   // Actions
   refreshQueue: () => Promise<void>;
   updatePlaybackState: (state: PlaybackState) => void;
+  setCurrentTrack: (track: SpotifyTrack | null) => void;
+  setDeviceId: (id: string) => void;
+
+  // Simple playback controls (minimal API calls)
+  playTrack: (track: SpotifyTrack) => Promise<void>;
+  togglePlayPause: () => Promise<void>;
 }
 
 const QueueContext = createContext<QueueContextType | undefined>(undefined);
@@ -36,19 +48,74 @@ interface QueueProviderProps {
 
 export function QueueProvider({ children }: QueueProviderProps) {
   // Queue state
-  const [currentTrack, setCurrentTrack] = useState<SpotifyTrack | null>(null);
-  const [queue, setQueue] = useState<SpotifyTrack[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [queue, setQueue] = useState<SpotifyTrack[]>([]);
+  const [deviceId, setDeviceId] = useState<string>("");
+  const [currentTrack, setCurrentTrack] = useState<SpotifyTrack | null>(null);
 
   // Playback state (updated from Player component)
   const [playbackState, setPlaybackState] = useState<PlaybackState | null>(null);
 
-  const { getCurrentQueue } = useSpotifyApi();
+  const {
+    getCurrentQueue,
+    playTrack: apiPlayTrack,
+    pausePlayback: apiPausePlayback,
+    resumePlayback: apiResumePlayback,
+    nextTrack: apiNextTrack
+  } = useSpotifyApi();
 
   const updatePlaybackState = useCallback((state: PlaybackState) => {
     setPlaybackState(state);
   }, []);
+
+  // Simple playback controls - using the cleaner API hook
+  const playTrack = useCallback(async (track: SpotifyTrack) => {
+    try {
+      // Check if this track is the same as current track
+      if (currentTrack?.id === track.id) {
+        // Just resume playback of current track
+        await apiResumePlayback(deviceId || undefined);
+        return;
+      }
+
+      // Find the track in the queue
+      const queueIndex = queue.findIndex(queueTrack => queueTrack.id === track.id);
+
+      if (queueIndex !== -1) {
+        // Track is in queue - skip to it by calling next() repeatedly
+        console.log(`Track found at queue position ${queueIndex}, skipping...`);
+
+        for (let i = 0; i < queueIndex + 1; i++) {
+          await apiNextTrack(deviceId || undefined);
+          // Small delay to prevent rate limiting
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+
+        // Update current track immediately for better UX
+        setCurrentTrack(track);
+      } else {
+        // Track not in queue - fall back to playing it directly (will create new context)
+        console.log("Track not in queue, playing directly");
+        await apiPlayTrack(track.id, deviceId || undefined);
+        setCurrentTrack(track);
+      }
+    } catch (error) {
+      console.error("Failed to play track:", error);
+    }
+  }, [deviceId, currentTrack, queue, apiResumePlayback, apiNextTrack, apiPlayTrack]);
+
+  const togglePlayPause = useCallback(async () => {
+    try {
+      if (playbackState?.isPlaying) {
+        await apiPausePlayback(deviceId || undefined);
+      } else {
+        await apiResumePlayback(deviceId || undefined);
+      }
+    } catch (error) {
+      console.error("Failed to toggle playback:", error);
+    }
+  }, [playbackState?.isPlaying, deviceId, apiPausePlayback, apiResumePlayback]);
 
   const refreshQueue = async () => {
     setLoading(true);
@@ -66,7 +133,8 @@ export function QueueProvider({ children }: QueueProviderProps) {
         setQueue([]);
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Failed to get queue";
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to get queue";
       setError(errorMessage);
       console.error("Failed to get current queue:", err);
     } finally {
@@ -74,25 +142,22 @@ export function QueueProvider({ children }: QueueProviderProps) {
     }
   };
 
-  // Load queue on mount
-  useEffect(() => {
-    refreshQueue();
-  }, []);
-
   const value: QueueContextType = {
     currentTrack,
     queue,
     loading,
     error,
     playbackState,
+    setDeviceId,
     refreshQueue,
+    setCurrentTrack,
     updatePlaybackState,
+    playTrack,
+    togglePlayPause,
   };
 
   return (
-    <QueueContext.Provider value={value}>
-      {children}
-    </QueueContext.Provider>
+    <QueueContext.Provider value={value}>{children}</QueueContext.Provider>
   );
 }
 

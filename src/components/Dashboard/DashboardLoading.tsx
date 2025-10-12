@@ -18,7 +18,7 @@ export default function DashboardLoading() {
         <section>
           <div className="h-8 rounded w-32 mb-4"></div>
           <div className="space-y-3">
-            {Array.from({ length: 5 }).map((_, i) => (
+            {[...Array(5)].map((_, i) => (
               <div key={i} className="flex items-center space-x-3 p-3">
                 <div className="w-12 h-12 rounded skeleton"></div>
                 <div className="flex-1 space-y-2">
@@ -34,7 +34,7 @@ export default function DashboardLoading() {
         <section>
           <div className="h-8 rounded w-32 mb-4"></div>
           <div className="space-y-3">
-            {Array.from({ length: 5 }).map((_, i) => (
+            {[...Array(5)].map((_, i) => (
               <div key={i} className="flex items-center space-x-3 p-3">
                 <div className="w-8 h-4 rounded skeleton"></div>
                 <div className="w-12 h-12 rounded skeleton"></div>
