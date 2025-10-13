@@ -14,7 +14,7 @@ export default function TrackListItem({
   index?: number;
   isCurrentTrack?: boolean;
 }) {
-  const { currentTrack, playbackState, playTrack, togglePlayPause } = useQueue();
+  const { currentTrack, playbackState, selectTrack, togglePlayPause } = useQueue();
 
   // If isCurrentTrack is explicitly provided, use that
   // Otherwise, default to checking if this track matches the currently playing track
@@ -31,7 +31,7 @@ export default function TrackListItem({
       await togglePlayPause();
     } else {
       // If different track, play it
-      await playTrack(track);
+      await selectTrack(track);
     }
   };
 

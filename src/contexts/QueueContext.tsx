@@ -16,37 +16,43 @@ interface PlaybackState {
   position: number; // Current position in ms
   duration: number; // Track duration in ms
   shuffle: boolean;
+  offset: number; // Position in the queue
   repeat_mode: 0 | 1 | 2;
 }
 
 interface QueueContextType {
   // Queue state
-  currentTrack: SpotifyTrack | null;
-  queue: SpotifyTrack[];
   loading: boolean;
   error: string | null;
+  currentTrack: SpotifyTrack | null;
+  queue: SpotifyTrack[];
 
   // Playback state (from Web Playback SDK)
   playbackState: PlaybackState | null;
 
   // Actions
   refreshQueue: () => Promise<void>;
-  updatePlaybackState: (state: PlaybackState) => void;
+  setPlaybackState: (state: PlaybackState) => void;
   setCurrentTrack: (track: SpotifyTrack | null) => void;
   setDeviceId: (id: string) => void;
 
   // Simple playback controls (minimal API calls)
-  playTrack: (track: SpotifyTrack) => Promise<void>;
-  togglePlayPause: () => Promise<void>;
+  selectTrack: (track: SpotifyTrack) => Promise<void>;
 }
 
 const QueueContext = createContext<QueueContextType | undefined>(undefined);
 
-interface QueueProviderProps {
-  children: ReactNode;
-}
+const initialPlaybackState: PlaybackState = {
+  isPlaying: false,
+  paused: true,
+  position: 0,
+  duration: 0,
+  shuffle: false,
+  offset: 0,
+  repeat_mode: 0,
+};
 
-export function QueueProvider({ children }: QueueProviderProps) {
+export function QueueProvider({ children }: { children: ReactNode }) {
   // Queue state
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -55,72 +61,51 @@ export function QueueProvider({ children }: QueueProviderProps) {
   const [currentTrack, setCurrentTrack] = useState<SpotifyTrack | null>(null);
 
   // Playback state (updated from Player component)
-  const [playbackState, setPlaybackState] = useState<PlaybackState | null>(null);
+  const [playbackState, setPlaybackState] =
+    useState<PlaybackState>(initialPlaybackState);
 
-  const {
-    getCurrentQueue,
-    playTrack: apiPlayTrack,
-    pausePlayback: apiPausePlayback,
-    resumePlayback: apiResumePlayback,
-    nextTrack: apiNextTrack
-  } = useSpotifyApi();
-
-  const updatePlaybackState = useCallback((state: PlaybackState) => {
-    setPlaybackState(state);
-  }, []);
+  const { getCurrentQueue, playTrack: apiPlayTrack } = useSpotifyApi();
 
   // Simple playback controls - using the cleaner API hook
-  const playTrack = useCallback(async (track: SpotifyTrack) => {
-    try {
-      // Check if this track is the same as current track
-      if (currentTrack?.id === track.id) {
-        // Just resume playback of current track
-        await apiResumePlayback(deviceId || undefined);
-        return;
-      }
-
-      // Find the track in the queue
-      const queueIndex = queue.findIndex(queueTrack => queueTrack.id === track.id);
-
-      if (queueIndex !== -1) {
-        // Track is in queue - skip to it by calling next() repeatedly
-        console.log(`Track found at queue position ${queueIndex}, skipping...`);
-
-        for (let i = 0; i < queueIndex + 1; i++) {
-          await apiNextTrack(deviceId || undefined);
-          // Small delay to prevent rate limiting
-          await new Promise(resolve => setTimeout(resolve, 100));
+  const selectTrack = useCallback(
+    async (track: SpotifyTrack) => {
+      try {
+        // Check if this track is the same as current track
+        if (currentTrack?.id === track.id) {
+          // Just resume playback of current track
+          setPlaybackState((prev) => ({ ...prev, isPlaying: true }));
+          return;
         }
 
-        // Update current track immediately for better UX
-        setCurrentTrack(track);
-      } else {
-        // Track not in queue - fall back to playing it directly (will create new context)
-        console.log("Track not in queue, playing directly");
-        await apiPlayTrack(track.id, deviceId || undefined);
-        setCurrentTrack(track);
-      }
-    } catch (error) {
-      console.error("Failed to play track:", error);
-    }
-  }, [deviceId, currentTrack, queue, apiResumePlayback, apiNextTrack, apiPlayTrack]);
+        // Find the track in the queue
+        const queueIndex = queue.findIndex(
+          (queueTrack) => queueTrack.id === track.id
+        );
 
-  const togglePlayPause = useCallback(async () => {
-    try {
-      if (playbackState?.isPlaying) {
-        await apiPausePlayback(deviceId || undefined);
-      } else {
-        await apiResumePlayback(deviceId || undefined);
+        if (queueIndex !== -1) {
+          // Track is in queue - skip to it by calling next() repeatedly
+          console.log(
+            `Track found at queue position ${queueIndex}, skipping...`
+          );
+          setPlaybackState((prev) => ({ ...prev, offset: 0 }));
+          // Update current track immediately for better UX
+          setCurrentTrack(track);
+        } else {
+          // Track not in queue - fall back to playing it directly (will create new context)
+          console.log("Track not in queue, playing directly");
+          await apiPlayTrack(track.id, deviceId || undefined);
+          setCurrentTrack(track);
+        }
+      } catch (error) {
+        console.error("Failed to play track:", error);
       }
-    } catch (error) {
-      console.error("Failed to toggle playback:", error);
-    }
-  }, [playbackState?.isPlaying, deviceId, apiPausePlayback, apiResumePlayback]);
+    },
+    [deviceId, currentTrack, queue, apiPlayTrack]
+  );
 
   const refreshQueue = async () => {
     setLoading(true);
     setError(null);
-
     try {
       const queueData = await getCurrentQueue();
       console.log("Queue data:", queueData);
@@ -151,9 +136,8 @@ export function QueueProvider({ children }: QueueProviderProps) {
     setDeviceId,
     refreshQueue,
     setCurrentTrack,
-    updatePlaybackState,
-    playTrack,
-    togglePlayPause,
+    setPlaybackState,
+    selectTrack,
   };
 
   return (
