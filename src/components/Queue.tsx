@@ -2,16 +2,7 @@
 
 import { useQueue } from "@/contexts/QueueContext";
 import TrackListItem from "./TrackListIem";
-
-const TrackLoading = () => (
-  <div className="flex items-center space-x-3 p-3">
-    <div className="w-12 h-12 rounded skeleton"></div>
-    <div className="flex-1 space-y-2">
-      <div className="h-4 rounded w-3/4 skeleton"></div>
-      <div className="h-3 rounded w-1/2 skeleton"></div>
-    </div>
-  </div>
-);
+import TrackLoading from "./Loading/TrackLoading";
 
 export default function Queue() {
   const {
@@ -29,9 +20,7 @@ export default function Queue() {
         </div>
         <div>
           <div className="skeleton w-32 h-6 mb-4 text-lg"></div>
-          {[...Array(4)].map((_, index) => (
-            <TrackLoading key={`loading-${index}`} />
-          ))}
+          <TrackLoading length={5} />
         </div>
       </div>
     );

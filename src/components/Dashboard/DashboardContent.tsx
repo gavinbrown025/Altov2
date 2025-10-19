@@ -8,8 +8,6 @@ import PlayLists from "./PlayLists";
 import TopTracks from "./TopTracks";
 import Recommendations from "./Recommendations";
 
-interface DashboardContentProps {}
-
 export default function DashboardContent() {
   const { user, loading } = useDashboard();
   if (loading) return <DashboardLoading />;

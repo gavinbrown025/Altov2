@@ -1,10 +1,10 @@
 "use client";
 import { SpotifyTrack, SpotifyEpisode } from "@/types/spotify";
 import { formatDuration } from "@/lib/utils";
+import Link from "next/link";
 import { useQueue } from "@/contexts/QueueContext";
 
 import UIIcon from "@/components/UIIcon";
-
 
 type MediaItem = SpotifyTrack | SpotifyEpisode;
 
@@ -38,7 +38,7 @@ export default function TrackListItem({
 
   // Type guard to check if track is a podcast episode
   const isPodcast = (item: MediaItem): item is SpotifyEpisode => {
-    return 'type' in item && item.type === 'episode';
+    return "type" in item && item.type === "episode";
   };
 
   // Get the appropriate image, title, and subtitle based on media type
@@ -57,11 +57,28 @@ export default function TrackListItem({
 
   const getSubtitleText = () => {
     if (isPodcast(track)) {
-      return track.show?.name || "Unknown Show";
+      return (
+        <p className="text-sm text-neutral truncate">
+          {track.show?.name || "Unknown Show"}
+        </p>
+      );
     }
-    return `${track.artists?.map((artist) => artist.name).join(", ")} • ${
-      track.album?.name || "..."
-    }`;
+    return (
+      <p className="text-sm text-neutral truncate">
+        {track.artists?.map((artist, index) => (
+          <span key={artist.id}>
+            {index > 0 && ","}
+            <Link
+              href={`/artist/${artist.id}`}
+              className="hover:text-base-content"
+            >
+              {artist.name}
+            </Link>
+          </span>
+        ))}{" "}
+        • {track.album?.name || "..."}
+      </p>
+    );
   };
 
   const imageData = getImageData();
@@ -115,7 +132,7 @@ export default function TrackListItem({
         >
           {track.name}
         </h4>
-        <p className="text-sm text-neutral truncate">{getSubtitleText()}</p>
+        {getSubtitleText()}
       </div>
       <div className="text-sm text-gray-500">
         {formatDuration(track.duration_ms)}

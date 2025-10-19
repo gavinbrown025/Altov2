@@ -9,6 +9,7 @@ import type {
   SpotifyArtist,
   SpotifySearchResponse,
   SpotifyQueue,
+  SpotifyAlbum,
 } from "@/types/spotify";
 
 interface SpotifyError {
@@ -33,14 +34,12 @@ export function useSpotifyApi() {
 
       try {
         const response = await fetch(url, { method });
-
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
           throw new Error(
             errorData.error || `HTTP ${response.status}: ${response.statusText}`
           );
         }
-
         return await response.json();
       } catch (err) {
         const errorMessage =
@@ -90,6 +89,35 @@ export function useSpotifyApi() {
     [spotifyRequest]
   );
 
+  const getArtist = useCallback(
+    (artistId: string) => spotifyRequest<SpotifyArtist>(`/artists/${artistId}`),
+    [spotifyRequest]
+  );
+
+  const getArtistTopTracks = useCallback(
+    (artistId: string) =>
+      spotifyRequest<{ tracks: SpotifyTrack[] }>(
+        `/artists/${artistId}/top-tracks`
+      ),
+    [spotifyRequest]
+  );
+
+  const getArtistAlbums = useCallback(
+    (artistId: string) =>
+      spotifyRequest<SpotifyPaginatedResponse<SpotifyAlbum>>(
+        `/artists/${artistId}/albums?limit=50&include_groups=album,single`
+      ),
+    [spotifyRequest]
+  );
+
+  const getAlbumTracks = useCallback(
+    (albumId: string) =>
+      spotifyRequest<SpotifyPaginatedResponse<SpotifyTrack>>(
+        `/albums/${albumId}/tracks`
+      ),
+    [spotifyRequest]
+  );
+
   const search = useCallback(
     (
       query: string,
@@ -109,17 +137,6 @@ export function useSpotifyApi() {
       spotifyRequest<SpotifyPaginatedResponse<any>>(
         `/me/player/recently-played?limit=${limit}`
       ),
-    [spotifyRequest]
-  );
-
-  const getCurrentQueue = useCallback(
-    () => spotifyRequest<SpotifyQueue>("/me/player/queue"),
-    [spotifyRequest]
-  );
-
-  const addToQueue = useCallback(
-    async (trackId: string) =>
-      await spotifyRequest(`/me/player/queue?uri=spotify:track:${trackId}`, "POST"),
     [spotifyRequest]
   );
 
@@ -199,6 +216,20 @@ export function useSpotifyApi() {
     [search]
   );
 
+  const getCurrentQueue = useCallback(
+    () => spotifyRequest<SpotifyQueue>("/me/player/queue"),
+    [spotifyRequest]
+  );
+
+  const addToQueue = useCallback(
+    async (trackId: string) =>
+      await spotifyRequest(
+        `/me/player/queue?uri=spotify:track:${trackId}`,
+        "POST"
+      ),
+    [spotifyRequest]
+  );
+
   return {
     loading,
     error,
@@ -207,6 +238,10 @@ export function useSpotifyApi() {
     getUserPlaylists,
     getTopTracks,
     getTopArtists,
+    getArtist,
+    getArtistTopTracks,
+    getArtistAlbums,
+    getAlbumTracks,
     search,
     getRecentlyPlayed,
     getCurrentQueue,

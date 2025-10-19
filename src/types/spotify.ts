@@ -169,7 +169,7 @@ export interface SpotifyCurrentPlayback {
 
 export interface SpotifyQueue {
   currently_playing: SpotifyTrack | SpotifyEpisode | null;
-  queue: (SpotifyTrack | SpotifyEpisode)[];
+  queue: SpotifyMediaItem[];
 }
 
 // Union type for media items that can be either tracks or episodes
