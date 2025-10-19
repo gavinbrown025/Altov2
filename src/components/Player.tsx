@@ -1,41 +1,23 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
-import SpotifyPlayer, {
-  spotifyApi,
-  SpotifyTrack,
-} from "react-spotify-web-playback";
+import SpotifyPlayer from "react-spotify-web-playback";
 import { useQueue } from "@/contexts/QueueContext";
 import { useSpotifyToken } from "@/hooks/useSpotifyToken";
+import type { SpotifyTrack } from "@/types/spotify";
 
 export default function Player({ className }: { className?: string }) {
   const { token, loading: tokenLoading, error: tokenError } = useSpotifyToken();
-  const {
-    setDeviceId,
-    refreshQueue,
-    currentTrack,
-    playbackState,
-    setPlaybackState,
-  } = useQueue();
+  const { playbackState, setPlaybackState, setDeviceId, refreshQueue } =
+    useQueue();
 
   const [playerReady, setPlayerReady] = useState(false);
 
-  const initializePlayerDevice = useCallback(
-    async (deviceId: string) => {
-      try {
-        await spotifyApi.setDevice(token, deviceId, false);
-        setDeviceId(deviceId);
-        setPlayerReady(true);
-      } catch (error) {
-        console.error("Failed to set device:", error);
-        return;
-      }
-    },
-    [token, setDeviceId]
-  );
-
   const isNewTrack = (track: SpotifyTrack) => {
-    return !currentTrack || track.id !== currentTrack.id;
+    return (
+      !playbackState.currentURI ||
+      track.id !== playbackState.currentURI
+    );
   };
 
   // Handle track changes and playback state updates
@@ -44,34 +26,27 @@ export default function Player({ className }: { className?: string }) {
       if (!state) return;
       // Initialize device when ready
       if (!playerReady && state.deviceId && token) {
-        initializePlayerDevice(state.deviceId);
+        setDeviceId(state.deviceId);
+        setPlayerReady(true);
       }
       // Refresh queue on track change
       if (state.track?.id && isNewTrack(state.track)) {
         refreshQueue();
       }
+      console.log("Player state changed:", state);
 
-      // Update playback state
-      const { paused, position, duration, shuffle, repeat_mode, offset } =
-        state;
       setPlaybackState({
-        isPlaying: !paused,
-        paused,
-        position,
-        duration,
-        shuffle,
-        repeat_mode,
-        offset,
+        currentURI: state.track,
+        isPlaying: !state.paused,
+        paused: state.paused,
+        position: state.position,
+        duration: state.duration,
+        shuffle: state.shuffle,
+        repeat_mode: state.repeat_mode,
+        offset: state.offset,
       });
     },
-    [
-      playerReady,
-      token,
-      currentTrack,
-      initializePlayerDevice,
-      refreshQueue,
-      setPlaybackState,
-    ]
+    [playerReady, token, playbackState.currentURI, setPlaybackState]
   );
 
   // Loading state
@@ -102,7 +77,6 @@ export default function Player({ className }: { className?: string }) {
             token={token}
             uris={[]}
             play={false}
-            offset={playbackState.offset}
             styles={{
               activeColor: "oklch(69% 0.17 162.48)",
               bgColor: "transparent",

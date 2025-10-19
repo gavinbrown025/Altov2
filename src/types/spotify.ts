@@ -57,6 +57,37 @@ export interface SpotifyAlbum {
   };
 }
 
+export interface SpotifyShow {
+  id: string;
+  name: string;
+  description: string;
+  images: SpotifyImage[];
+  publisher: string;
+  languages: string[];
+  explicit: boolean;
+  total_episodes: number;
+  external_urls: {
+    spotify: string;
+  };
+}
+
+export interface SpotifyEpisode {
+  id: string;
+  name: string;
+  description: string;
+  images: SpotifyImage[];
+  duration_ms: number;
+  explicit: boolean;
+  release_date: string;
+  release_date_precision: string;
+  show: SpotifyShow;
+  type: "episode";
+  external_urls: {
+    spotify: string;
+  };
+  preview_url: string | null;
+}
+
 export interface SpotifyPlaylist {
   id: string;
   name: string;
@@ -131,12 +162,15 @@ export interface SpotifyCurrentPlayback {
     uri: string;
   } | null;
   progress_ms: number;
-  item: SpotifyTrack | null;
+  item: SpotifyTrack | SpotifyEpisode | null;
   currently_playing_type: "track" | "episode" | "ad" | "unknown";
   is_playing: boolean;
 }
 
 export interface SpotifyQueue {
-  currently_playing: SpotifyTrack | null;
-  queue: SpotifyTrack[];
+  currently_playing: SpotifyTrack | SpotifyEpisode | null;
+  queue: (SpotifyTrack | SpotifyEpisode)[];
 }
+
+// Union type for media items that can be either tracks or episodes
+export type SpotifyMediaItem = SpotifyTrack | SpotifyEpisode;

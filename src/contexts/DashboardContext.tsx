@@ -69,9 +69,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
         const seedTracks = recentTracks.items
           .slice(0, 5)
           .map(({ track }) => track as SpotifyTrack);
-        console.log(seedTracks);
         const recommendations = await getRecommendations({ seedTracks });
-        console.log(recommendations);
 
         setData({
           user,

@@ -14,7 +14,11 @@ const TrackLoading = () => (
 );
 
 export default function Queue() {
-  const { currentTrack, loading, queue, error } = useQueue();
+  const {
+    loading,
+    error,
+    queue: { currently_playing, queue },
+  } = useQueue();
 
   if (loading)
     return (
@@ -38,10 +42,10 @@ export default function Queue() {
   return (
     <section className="space-y-6">
       {/* Show currently playing track */}
-      {currentTrack && (
+      {currently_playing && (
         <div>
           <h3 className="text-lg font-semibold mb-4">Now Playing</h3>
-          {loading ? <TrackLoading /> : <TrackListItem track={currentTrack} />}
+          <TrackListItem track={currently_playing} />
         </div>
       )}
 
@@ -49,17 +53,13 @@ export default function Queue() {
       <div>
         <h3 className="text-lg font-semibold mb-2">Up Next</h3>
         <div className="space-y-3">
-          {queue.map((track, index) =>
-            loading ? (
-              <TrackLoading key={`queue-${index}`} />
-            ) : (
-              <TrackListItem
-                key={`queue-${index}`}
-                track={track}
-                isCurrentTrack={false}
-              />
-            )
-          )}
+          {queue.map((track, index) => (
+            <TrackListItem
+              key={`queue-${index}`}
+              track={track}
+              isCurrentTrack={false}
+            />
+          ))}
         </div>
       </div>
     </section>

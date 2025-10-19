@@ -1,37 +1,77 @@
 "use client";
-import { SpotifyTrack } from "@/types/spotify";
+import { SpotifyTrack, SpotifyEpisode } from "@/types/spotify";
 import { formatDuration } from "@/lib/utils";
 import { useQueue } from "@/contexts/QueueContext";
 
 import UIIcon from "@/components/UIIcon";
+
+
+type MediaItem = SpotifyTrack | SpotifyEpisode;
 
 export default function TrackListItem({
   track,
   index,
   isCurrentTrack,
 }: {
-  track: SpotifyTrack;
+  track: MediaItem;
   index?: number;
   isCurrentTrack?: boolean;
 }) {
-  const { currentTrack, playbackState, selectTrack, togglePlayPause } = useQueue();
+  const { playbackState, playTrack, pausePlayback, resumePlayback } =
+    useQueue();
+
+  const togglePlayPause = async () => {
+    if (isPlaying) {
+      await pausePlayback();
+    } else {
+      await resumePlayback();
+    }
+  };
 
   // If isCurrentTrack is explicitly provided, use that
   // Otherwise, default to checking if this track matches the currently playing track
   const isCurrent =
     isCurrentTrack !== undefined
       ? isCurrentTrack
-      : currentTrack?.id === track.id;
+      : playbackState.currentURI === track.id;
+  const isPlaying = isCurrent && playbackState.isPlaying;
 
-  const isPlaying = isCurrent && playbackState?.isPlaying;
+  // Type guard to check if track is a podcast episode
+  const isPodcast = (item: MediaItem): item is SpotifyEpisode => {
+    return 'type' in item && item.type === 'episode';
+  };
+
+  // Get the appropriate image, title, and subtitle based on media type
+  const getImageData = () => {
+    if (isPodcast(track)) {
+      return {
+        images: track.images || track.show?.images,
+        alt: track.show?.name || "Podcast Episode",
+      };
+    }
+    return {
+      images: track.album?.images,
+      alt: track.album?.name || "Album",
+    };
+  };
+
+  const getSubtitleText = () => {
+    if (isPodcast(track)) {
+      return track.show?.name || "Unknown Show";
+    }
+    return `${track.artists?.map((artist) => artist.name).join(", ")} • ${
+      track.album?.name || "..."
+    }`;
+  };
+
+  const imageData = getImageData();
 
   const handleTrackClick = async () => {
     if (isCurrent) {
-      // If this is the current track, just toggle play/pause
       await togglePlayPause();
     } else {
-      // If different track, play it
-      await selectTrack(track);
+      // If different track/episode, play it
+      await playTrack(track.id);
     }
   };
 
@@ -58,14 +98,14 @@ export default function TrackListItem({
             <UIIcon iconName="play_arrow" />
           )}
         </div>
-        {track.album?.images && track.album.images[0] ? (
+        {imageData.images && imageData.images[0] ? (
           <img
-            src={track.album.images[0].url}
-            alt={track.album.name}
+            src={imageData.images[0].url}
+            alt={imageData.alt}
             className="size-12 rounded"
           />
         ) : (
-          <UIIcon iconName="hide_image" />
+          <UIIcon iconName={isPodcast(track) ? "podcasts" : "hide_image"} />
         )}
       </div>
 
@@ -75,10 +115,7 @@ export default function TrackListItem({
         >
           {track.name}
         </h4>
-        <p className="text-sm text-neutral truncate">
-          {track.artists?.map((artist) => artist.name).join(", ")} •{" "}
-          {track.album.name}
-        </p>
+        <p className="text-sm text-neutral truncate">{getSubtitleText()}</p>
       </div>
       <div className="text-sm text-gray-500">
         {formatDuration(track.duration_ms)}

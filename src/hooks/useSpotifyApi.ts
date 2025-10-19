@@ -10,7 +10,6 @@ import type {
   SpotifySearchResponse,
   SpotifyQueue,
 } from "@/types/spotify";
-import { get } from "http";
 
 interface SpotifyError {
   message: string;
@@ -23,14 +22,17 @@ export function useSpotifyApi() {
   const [error, setError] = useState<SpotifyError | null>(null);
 
   const spotifyRequest = useCallback(
-    async <T>(endpoint: string): Promise<T> => {
+    async <T>(
+      endpoint: string,
+      method: "GET" | "POST" | "PUT" | "DELETE" = "GET"
+    ): Promise<T> => {
       setLoading(true);
       setError(null);
 
+      const url = `/api/spotify?endpoint=${encodeURIComponent(endpoint)}`;
+
       try {
-        const response = await fetch(
-          `/api/spotify?endpoint=${encodeURIComponent(endpoint)}`
-        );
+        const response = await fetch(url, { method });
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
@@ -115,13 +117,18 @@ export function useSpotifyApi() {
     [spotifyRequest]
   );
 
+  const addToQueue = useCallback(
+    async (trackId: string) =>
+      await spotifyRequest(`/me/player/queue?uri=spotify:track:${trackId}`, "POST"),
+    [spotifyRequest]
+  );
+
   const getRecommendations = useCallback(
     async (params: {
       seedTracks?: SpotifyTrack[];
       seedArtists?: string[];
       limit?: number;
     }) => {
-      console.log(params);
       const { seedTracks = [], limit = 20 } = params;
 
       if (seedTracks.length === 0) {
@@ -167,7 +174,7 @@ export function useSpotifyApi() {
 
         // Combine and deduplicate results
         const allTracks = searchResults
-          .flatMap((result) => (result.tracks?.items ?? []))
+          .flatMap((result) => result.tracks?.items ?? [])
           .filter(
             (track) =>
               // Exclude seed tracks
@@ -181,10 +188,8 @@ export function useSpotifyApi() {
         );
 
         // Shuffle and limit results
-        const shuffledTracks = uniqueTracks.sort(() => 0.5 - Math.random());
-
         return {
-          tracks: shuffledTracks.slice(0, limit),
+          tracks: uniqueTracks.slice(0, limit),
         };
       } catch (error) {
         console.error("Failed to get recommendations via search:", error);
@@ -194,80 +199,10 @@ export function useSpotifyApi() {
     [search]
   );
 
-  // Playback control functions
-  const playTrack = useCallback(async (trackId: string, deviceId?: string) => {
-    const endpoint = `/me/player/play${
-      deviceId ? `?device_id=${deviceId}` : ""
-    }`;
-    const body = JSON.stringify({
-      uris: [`spotify:track:${trackId}`],
-    });
-
-    const response = await fetch(
-      `/api/spotify?endpoint=${encodeURIComponent(endpoint)}`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body,
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(`Failed to play track: ${response.statusText}`);
-    }
-  }, []);
-
-  const pausePlayback = useCallback(async (deviceId?: string) => {
-    const endpoint = `/me/player/pause${
-      deviceId ? `?device_id=${deviceId}` : ""
-    }`;
-    const response = await fetch(
-      `/api/spotify?endpoint=${encodeURIComponent(endpoint)}`,
-      {
-        method: "PUT",
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(`Failed to pause: ${response.statusText}`);
-    }
-  }, []);
-
-  const resumePlayback = useCallback(async (deviceId?: string) => {
-    const endpoint = `/me/player/play${
-      deviceId ? `?device_id=${deviceId}` : ""
-    }`;
-    const response = await fetch(
-      `/api/spotify?endpoint=${encodeURIComponent(endpoint)}`,
-      {
-        method: "PUT",
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(`Failed to resume: ${response.statusText}`);
-    }
-  }, []);
-
-  const nextTrack = useCallback(async (deviceId?: string) => {
-    const endpoint = `/me/player/next${
-      deviceId ? `?device_id=${deviceId}` : ""
-    }`;
-    const response = await fetch(
-      `/api/spotify?endpoint=${encodeURIComponent(endpoint)}`,
-      {
-        method: "POST",
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(`Failed to skip: ${response.statusText}`);
-    }
-  }, []);
-
   return {
     loading,
     error,
+    spotifyRequest,
     getCurrentUser,
     getUserPlaylists,
     getTopTracks,
@@ -275,12 +210,7 @@ export function useSpotifyApi() {
     search,
     getRecentlyPlayed,
     getCurrentQueue,
-    spotifyRequest,
     getRecommendations,
-    // Playback controls
-    playTrack,
-    pausePlayback,
-    resumePlayback,
-    nextTrack,
+    addToQueue,
   };
 }
